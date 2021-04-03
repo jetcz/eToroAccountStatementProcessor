@@ -5,8 +5,177 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:eToroAccountStatementProcessor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="eToro Account Statement Processor" Height="300" Width="1000">
+
+	<DockPanel>
+		<Menu DockPanel.Dock="Top" Height="20">
+			<MenuItem Header="_File">
+				<MenuItem Header="_Open"  Click="mnuOpen_Click"/>
+				<Separator />
+				<MenuItem Header="_Exit" Click="mnuExit_Click"/>
+			</MenuItem>
+			<MenuItem Header="_Help">
+				<MenuItem Header="_About"  Click="mnuAbout_Click"/>
+			</MenuItem>
+		</Menu>
+
+
+		<StatusBar DockPanel.Dock="Bottom">
+			<StatusBar.ItemsPanel>
+				<ItemsPanelTemplate>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+					</Grid>
+				</ItemsPanelTemplate>
+			</StatusBar.ItemsPanel>
+			<StatusBarItem>
+				<Label Name="lblFileCount" Content="" />
+			</StatusBarItem>
+			<Separator Grid.Column="1" />
+
+
+			<StatusBarItem Grid.Column="2">
+				<Label Name="lblExchangeRate" Content="Exchange rate" />
+			</StatusBarItem>
+			<StatusBarItem Grid.Column="3">
+				<TextBox Name="tbExchangeRate" Width="45" />
+			</StatusBarItem>
+			<StatusBarItem Grid.Column="4">
+				<Button Name="btnOk" Content="OK" Click="btnOk_Click"/>
+			</StatusBarItem>
+			<StatusBarItem Grid.Column="6">
+				<ProgressBar Name="prg"  Width="100" Height="16"
+						Value="{Binding Progress, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+						Maximum="{Binding Maximum, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+						Minimum="{Binding Minimum, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"							
+							 />
+			</StatusBarItem>
+		</StatusBar>
+		<DataGrid Name="dgResult" SelectionMode="Extended" 
+				  VerticalScrollBarVisibility="Auto" DockPanel.Dock="Top" FontSize="14" 
+				  HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" CanUserAddRows="false"
+				  ColumnWidth="*" CanUserDeleteRows="false" IsReadOnly="true" SelectionUnit="Cell"
+				  AutoGenerateColumns="false"
+				  >
+			<DataGrid.Columns >
+				<DataGridTextColumn Header="Type" Binding="{Binding Type}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+							<Setter Property="Padding" Value="7"/>
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.FontWeight" Value="SemiBold"/>
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Revenue ($)" Binding="{Binding Revenue_USD}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Expenses ($)" Binding="{Binding Expense_USD}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Profit ($)" Binding="{Binding Profit_USD}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Revenue (LOC)" Binding="{Binding Revenue_LOC}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Expenses (LOC)" Binding="{Binding Expense_LOC}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Profit/Loss (LOC)" Binding="{Binding Profit_LOC}">
+					<DataGridTextColumn.HeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="HorizontalContentAlignment"
+                 Value="Center" />
+						</Style>
+					</DataGridTextColumn.HeaderStyle>
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+							<Setter Property="TextBlock.Padding" Value="3" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+			</DataGrid.Columns>
+			<DataGrid.RowStyle>
+				<Style TargetType="DataGridRow">
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding Type}" Value="Sum">
+							<Setter Property="Background" Value="LightGray"></Setter>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</DataGrid.RowStyle>
+		</DataGrid>
+
+	</DockPanel>
 </Window>
