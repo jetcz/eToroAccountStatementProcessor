@@ -6,73 +6,62 @@ namespace eToroAccountStatementProcessor.Models
 {
 	public class StatementModel
 	{
-		public List<StatementRowData> RawData { get; set; } = new List<StatementRowData>();
-		public decimal ExchangeRate { get; set; }
+		public List<ClosedPositionRecord> RawData { get; set; } = new List<ClosedPositionRecord>();
 
-		public List<StatementViewData> GetViewData()
+		private decimal _ExchangeRate;
+		public bool UseLocalCurrency { get; set; }
+		public decimal ExchangeRate { get => UseLocalCurrency ? _ExchangeRate : 1; set => _ExchangeRate = value; }
+
+		public List<ClosedPositionViewRecord> GetViewModel()
 		{
-			var summed = RawData.GroupBy(x => x.TradeType).Select(
-				x => new
+			var grouped = RawData.GroupBy(x => x.TradeType).Select(
+				x => new ClosedPositionViewRecord()
 				{
-					Type = x.Key,
-					Revenue = x.Sum(s => s.Revenue),
-					Expense = x.Sum(s => s.Expense),
-					Profit = x.Sum(s => s.Profit),
+					TradeType = x.Key,
+					Revenue = Math.Round(x.Sum(y => y.Revenue) * ExchangeRate, 2, MidpointRounding.AwayFromZero),
+					Expense = Math.Round(x.Sum(y => y.Expense) * ExchangeRate, 2, MidpointRounding.AwayFromZero),
+					Profit = Math.Round(x.Sum(y => y.Profit) * ExchangeRate, 2, MidpointRounding.AwayFromZero),
+					Commision = Math.Round(x.Sum(y => y.Commision) * ExchangeRate, 2, MidpointRounding.AwayFromZero),
+					Dividend = Math.Round(x.Sum(y => y.Dividend) * ExchangeRate, 2, MidpointRounding.AwayFromZero),
 				});
 
-			var localized = summed.Select(
-				x => new StatementViewData()
-				{
-					Type = x.Type.ToString(),
-					Revenue_USD = x.Revenue,
-					Expense_USD = x.Expense,
-					Profit_USD = x.Profit,
-					Revenue_LOC = Math.Round(x.Revenue * ExchangeRate, 2, MidpointRounding.AwayFromZero),
-					Expense_LOC = Math.Round(x.Expense * ExchangeRate, 2, MidpointRounding.AwayFromZero),
-					Profit_LOC = Math.Round(x.Profit * ExchangeRate, 2, MidpointRounding.AwayFromZero),
-				});
-
-			var sums = new StatementViewData()
+			var sums = new ClosedPositionViewRecord()
 			{
-				Type = "Sum",
-				Revenue_USD = localized.Sum(s => s.Revenue_USD),
-				Expense_USD = localized.Sum(s => s.Expense_USD),
-				Profit_USD = localized.Sum(s => s.Profit_USD),
-				Revenue_LOC = localized.Sum(s => s.Revenue_LOC),
-				Expense_LOC = localized.Sum(s => s.Expense_LOC),
-				Profit_LOC = localized.Sum(s => s.Profit_LOC),
+				TradeType = PositionType.Sum, //not trade type
+				Revenue = grouped.Sum(s => s.Revenue),
+				Expense = grouped.Sum(s => s.Expense),
+				Profit = grouped.Sum(s => s.Profit),
+				Commision = grouped.Sum(s => s.Commision),
+				Dividend = grouped.Sum(s => s.Dividend),
 			};
 
-			var complete = localized.ToList();
+			var complete = grouped.ToList();
 			complete.Add(sums);
 
 			return complete;
 		}
 	}
 
-	public class StatementRowData
+	public class ClosedPositionRecord
 	{
-		public TradeType TradeType { get; set; }
-		public decimal Revenue { get { return Expense + Profit; } }
+		public PositionType TradeType { get; set; }
+		public decimal Revenue { get { return Expense + Profit + Dividend - Commision; } }
 		public decimal Expense { get; set; }
 		public decimal Profit { get; set; }
+		public decimal Commision { get; set; }
+		public decimal Dividend { get; set; }
 	}
 
-	public enum TradeType
+	public class ClosedPositionViewRecord : ClosedPositionRecord
 	{
+		public new decimal Revenue { get; set; }
+	}
+
+	public enum PositionType
+	{
+		Sum,
 		Stock,
 		CFD,
 		Crypto,
-	}
-
-	public class StatementViewData
-	{
-		public string Type { get; set; }
-		public decimal Revenue_USD { get; set; }
-		public decimal Expense_USD { get; set; }
-		public decimal Profit_USD { get; set; }
-		public decimal Revenue_LOC { get; set; }
-		public decimal Expense_LOC { get; set; }
-		public decimal Profit_LOC { get; set; }
 	}
 }

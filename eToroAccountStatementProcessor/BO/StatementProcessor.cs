@@ -7,28 +7,39 @@ namespace eToroAccountStatementProcessor.BO
 {
 	public class StatementProcessor
 	{
+		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
+
 		private readonly List<string> Cryptos = new List<string>() {
 			"Bitcoin", "Ethereum", "Bitcoin Cash", "Ripple", "Dash", "Litecoin", "Ethereum Classic", "Cardano", "IOTA", "Stellar", "EOS", "NEO", "TRON", "ZCASH", "Binance Coin", "Tezos"
 		};
 
-		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
+		private readonly List<string> CryptosCheckStrings = new List<string>();
 
-		public List<StatementRowData> Process(DataTable Data)
+		public StatementProcessor()
 		{
-			List<StatementRowData> retval = new List<StatementRowData>();
+			foreach (var item in Cryptos)
+			{
+				CryptosCheckStrings.Add($"Buy {item}");
+				CryptosCheckStrings.Add($"Sell {item}");
+			}
+		}
+
+		public List<ClosedPositionRecord> Process(DataTable Data)
+		{
+			List<ClosedPositionRecord> retval = new List<ClosedPositionRecord>();
 
 			for (int i = 0; i < Data.Rows.Count; i++)
 			{
 				//System.Threading.Thread.Sleep(1);
 				Progress.Progress = (int)Math.Ceiling(((i + 1) / (decimal)Data.Rows.Count) * 100);
 
-				StatementRowData row = new StatementRowData();
+				ClosedPositionRecord row = new ClosedPositionRecord();
 
 				DataRow dr = Data.Rows[i];
 
 				if ((string)dr["Is Real"] == "CFD") //cfd must be taxed even if held over 3 yrs
 				{
-					row.TradeType = TradeType.CFD;
+					row.TradeType = PositionType.CFD;
 				}
 				else
 				{
@@ -43,18 +54,20 @@ namespace eToroAccountStatementProcessor.BO
 					}
 
 					string Action = (string)dr["Action"];
-					if (Action.Contains(Cryptos))
+					if (Action.Contains(CryptosCheckStrings))
 					{
-						row.TradeType = TradeType.Crypto;
+						row.TradeType = PositionType.Crypto;
 					}
 					else
 					{
-						row.TradeType = TradeType.Stock;
+						row.TradeType = PositionType.Stock;
 					}
 				}
 
 				row.Profit = Convert.ToDecimal((string)dr["Profit"]);
 				row.Expense = Convert.ToDecimal((string)dr["Amount"]);
+				row.Commision = Convert.ToDecimal((string)dr["Spread"]);
+				row.Dividend = Convert.ToDecimal((string)dr["Rollover Fees And Dividends"]);
 
 				retval.Add(row);
 			}

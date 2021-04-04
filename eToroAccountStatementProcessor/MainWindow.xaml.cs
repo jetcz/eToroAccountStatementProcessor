@@ -15,8 +15,8 @@ namespace eToroAccountStatementProcessor
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		StatementModel DataModel;
-		GlobalProgress Progress;
+		StatementModel StatementModel;
+		GlobalProgressModel Progress;
 
 		public MainWindow()
 		{
@@ -28,10 +28,10 @@ namespace eToroAccountStatementProcessor
 
 		private void Init()
 		{
-			DataModel = new StatementModel();
-			Progress = new GlobalProgress();
+			StatementModel = new StatementModel();
+			Progress = new GlobalProgressModel();
 			prg.DataContext = Progress;
-			SetExchangeRate();
+			SetCurrency();
 		}
 
 		private async void DownloadExchangeRate()
@@ -44,14 +44,16 @@ namespace eToroAccountStatementProcessor
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show($@"Failed to get last year exchange rate{Environment.NewLine}{Environment.NewLine}{ex}");
+				MessageBox.Show($"Failed to get last year exchange rate{Environment.NewLine}{Environment.NewLine}{ex}");
 			}
 		}
 
-		private void SetExchangeRate()
+		private void SetCurrency()
 		{
-			decimal.TryParse(tbExchangeRate.Text.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal d);
-			DataModel.ExchangeRate = d;
+			decimal.TryParse(tbExchangeRate.Text.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal ExchangeRate);
+
+			StatementModel.ExchangeRate = ExchangeRate;
+			StatementModel.UseLocalCurrency = rbLocalCurrency.IsChecked == true;
 		}
 
 		private void ProcessFileSelection(OpenFileDialog openFileDialog)
@@ -68,11 +70,10 @@ namespace eToroAccountStatementProcessor
 
 				Task t = Task.Run(() =>
 				{
-
 					try
 					{
 						var data = ep.GetData(filePath);
-						DataModel.RawData.AddRange(sp.Process(data));
+						StatementModel.RawData.AddRange(sp.Process(data));
 					}
 					catch (Exception ex)
 					{
@@ -81,7 +82,6 @@ namespace eToroAccountStatementProcessor
 							MessageBox.Show(ex.ToString());
 						});
 					}
-
 				});
 				Tasks.Add(t);
 			}
@@ -89,7 +89,7 @@ namespace eToroAccountStatementProcessor
 			Task.WhenAll(Tasks)
 			   .ContinueWith(x =>
 			   {
-				   ProcessResult();
+				   BindData();
 				   ShowProgressBar(false);
 			   });
 		}
@@ -102,16 +102,21 @@ namespace eToroAccountStatementProcessor
 			});
 		}
 
-		private void ProcessResult()
+		private void BindData()
 		{
-			if (DataModel.RawData.Count() == 0)
+			if (StatementModel.RawData.Count() == 0)
 			{
 				return;
 			}
 
+			var statementModel = StatementModel.GetViewModel();
+			var taxModel = new TaxModel().GetTaxReportModel(statementModel);
+
 			Dispatcher.Invoke(() =>
 			{
-				dgResult.ItemsSource = DataModel.GetViewData();
+				pnlGrids.Visibility = Visibility.Visible;
+				dgResult.ItemsSource = statementModel;
+				dgTaxReport.ItemsSource = taxModel;
 			});
 		}
 
@@ -140,10 +145,10 @@ namespace eToroAccountStatementProcessor
 			Application.Current.Shutdown();
 		}
 
-		private void btnOk_Click(object sender, RoutedEventArgs e)
+		private void Currency_Click(object sender, RoutedEventArgs e)
 		{
-			SetExchangeRate();
-			ProcessResult();
+			SetCurrency();
+			BindData();
 		}
 
 		private void mnuAbout_Click(object sender, RoutedEventArgs e)

@@ -31,7 +31,7 @@ namespace eToroAccountStatementProcessor.Models
 		}
 	}
 
-	public class GlobalProgress : INotifyPropertyChanged
+	public class GlobalProgressModel : INotifyPropertyChanged
 	{
 		public int Minimum { get { return Progresses.Sum(x => x.Minimum); } }
 		public int Maximum { get { return Progresses.Sum(x => x.Maximum); } }
