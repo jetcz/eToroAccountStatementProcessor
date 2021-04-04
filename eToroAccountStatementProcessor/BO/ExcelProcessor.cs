@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using eToroAccountStatementProcessor.Models;
 using ExcelDataReader;
 
-namespace eToroAccountStatementProcessor
+namespace eToroAccountStatementProcessor.BO
 {
 
 	public class ExcelProcessor
@@ -22,7 +18,7 @@ namespace eToroAccountStatementProcessor
 			{
 				var result = reader.AsDataSet(new ExcelDataSetConfiguration()
 				{
-					FilterSheet = (tableReader, sheetIndex) => { return sheetIndex == 1; },
+					FilterSheet = (tableReader, sheetIndex) => { return sheetIndex == 1; }, //take the second sheet with the closed positions
 
 					ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
 					{

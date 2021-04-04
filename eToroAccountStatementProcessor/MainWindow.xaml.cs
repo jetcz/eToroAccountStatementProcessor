@@ -1,19 +1,12 @@
-﻿using Microsoft.Win32;
+﻿using eToroAccountStatementProcessor.BO;
+using eToroAccountStatementProcessor.Models;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace eToroAccountStatementProcessor
 {
@@ -29,6 +22,8 @@ namespace eToroAccountStatementProcessor
 		{
 			InitializeComponent();
 			ShowProgressBar(false);
+			DownloadExchangeRate();
+			Init();
 		}
 
 		private void Init()
@@ -39,7 +34,21 @@ namespace eToroAccountStatementProcessor
 			SetExchangeRate();
 		}
 
-		public void SetExchangeRate()
+		private async void DownloadExchangeRate()
+		{
+			try
+			{
+				var ep = new ExchangeRateProvider(DateTime.Today.Year - 1, "USD");
+
+				tbExchangeRate.Text = (await ep.GetExchangeRate()).ToString(CultureInfo.InvariantCulture);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($@"Failed to get last year exchange rate{Environment.NewLine}{Environment.NewLine}{ex}");
+			}
+		}
+
+		private void SetExchangeRate()
 		{
 			decimal.TryParse(tbExchangeRate.Text.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal d);
 			DataModel.ExchangeRate = d;
@@ -47,6 +56,8 @@ namespace eToroAccountStatementProcessor
 
 		private void ProcessFileSelection(OpenFileDialog openFileDialog)
 		{
+			ShowProgressBar(true);
+
 			List<Task> Tasks = new List<Task>();
 			foreach (var filePath in openFileDialog.FileNames)
 			{
@@ -54,7 +65,7 @@ namespace eToroAccountStatementProcessor
 				StatementProcessor sp = new StatementProcessor();
 				Progress.Add(ep.Progress);
 				Progress.Add(sp.Progress);
-			
+
 				Task t = Task.Run(() =>
 				{
 
@@ -93,6 +104,11 @@ namespace eToroAccountStatementProcessor
 
 		private void ProcessResult()
 		{
+			if (DataModel.RawData.Count() == 0)
+			{
+				return;
+			}
+
 			Dispatcher.Invoke(() =>
 			{
 				dgResult.ItemsSource = DataModel.GetViewData();
@@ -101,17 +117,18 @@ namespace eToroAccountStatementProcessor
 
 		private void mnuOpen_Click(object sender, RoutedEventArgs e)
 		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Multiselect = true;
-			openFileDialog.Filter = "Excel (*.xlsx)|*.xlsx";
-			openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			if (openFileDialog.ShowDialog() == true)
+			OpenFileDialog openFileDialog = new OpenFileDialog
 			{
-				Init();
+				Multiselect = true,
+				Filter = "Excel (*.xlsx)|*.xlsx",
+				InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+			};
 
+			if (openFileDialog.ShowDialog() == true)
+			{				
 				lblFileCount.Content = $"Files: {openFileDialog.FileNames.Count()}";
 
-				ShowProgressBar(true);
+				Init();				
 
 				ProcessFileSelection(openFileDialog);
 			}
@@ -133,10 +150,9 @@ namespace eToroAccountStatementProcessor
 		{
 			MessageBox.Show(@"eToro Account Statement Processor
 
-This tools calculates tax data from eToro account statement. Make sure that the statement(s) cover single year only.
-It supports selecting of multiple files at once. It automatically skips trades opened earlier than 3 years ago (except CFD).
+This tools calculates tax data from eToro account statement.
+It supports selecting of multiple files at once.  Make sure that the statement(s) cover single year only. It automatically skips trades opened earlier than 3 years ago (except CFD).
 
-Author:
 Jiří Macháček
 jiri.machacek87@gmail.com
 ");

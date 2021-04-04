@@ -1,15 +1,13 @@
-﻿using System;
+﻿using eToroAccountStatementProcessor.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace eToroAccountStatementProcessor
+namespace eToroAccountStatementProcessor.BO
 {
 	public class StatementProcessor
 	{
-		private List<string> Cryptos = new List<string>() {
+		private readonly List<string> Cryptos = new List<string>() {
 			"Bitcoin", "Ethereum", "Bitcoin Cash", "Ripple", "Dash", "Litecoin", "Ethereum Classic", "Cardano", "IOTA", "Stellar", "EOS", "NEO", "TRON", "ZCASH", "Binance Coin", "Tezos"
 		};
 
@@ -22,7 +20,7 @@ namespace eToroAccountStatementProcessor
 			for (int i = 0; i < Data.Rows.Count; i++)
 			{
 				//System.Threading.Thread.Sleep(1);
-				Progress.Progress = ((i + 1) / (double)Data.Rows.Count) * 100;
+				Progress.Progress = (int)Math.Ceiling(((i + 1) / (decimal)Data.Rows.Count) * 100);
 
 				StatementRowData row = new StatementRowData();
 

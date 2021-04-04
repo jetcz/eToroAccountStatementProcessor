@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace eToroAccountStatementProcessor
+namespace eToroAccountStatementProcessor.Models
 {
 	public class ProgressModel : INotifyPropertyChanged
 	{
-		public double Minimum { get; set; }
-		public double Maximum { get; set; }
+		public int Minimum { get; set; }
+		public int Maximum { get; set; }
 
 
-		private double _progress;
-		public double Progress
+		private int _progress;
+		public int Progress
 		{
 			get { return _progress; }
 			set
@@ -38,9 +34,9 @@ namespace eToroAccountStatementProcessor
 
 	public class GlobalProgress : INotifyPropertyChanged
 	{
-		public double Minimum { get { return 0; } }
-		public double Maximum { get { return Progresses.Sum(x => x.Maximum); } }
-		public double Progress { get { return Progresses.Sum(x => x.Progress); } }
+		public int Minimum { get { return Progresses.Sum(x => x.Minimum); } } 
+		public int Maximum { get { return Progresses.Sum(x => x.Maximum); } }
+		public int Progress { get { return Progresses.Sum(x => x.Progress); } }
 
 		private List<ProgressModel> Progresses { get; set; } = new List<ProgressModel>();
 
@@ -49,7 +45,8 @@ namespace eToroAccountStatementProcessor
 			ProgressModel.PropertyChanged += ProgressModel_PropertyChanged;
 
 			Progresses.Add(ProgressModel);
-	
+
+			OnPropertyChanged(nameof(Minimum));
 			OnPropertyChanged(nameof(Maximum));
 		}
 
