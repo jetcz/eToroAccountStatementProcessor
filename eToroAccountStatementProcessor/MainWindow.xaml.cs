@@ -125,10 +125,10 @@ namespace eToroAccountStatementProcessor
 			};
 
 			if (openFileDialog.ShowDialog() == true)
-			{				
+			{
 				lblFileCount.Content = $"Files: {openFileDialog.FileNames.Count()}";
 
-				Init();				
+				Init();
 
 				ProcessFileSelection(openFileDialog);
 			}

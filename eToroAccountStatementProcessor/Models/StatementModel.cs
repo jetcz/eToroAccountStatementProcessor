@@ -12,7 +12,7 @@ namespace eToroAccountStatementProcessor.Models
 		public List<StatementViewData> GetViewData()
 		{
 			var summed = RawData.GroupBy(x => x.TradeType).Select(
-				x => new 
+				x => new
 				{
 					Type = x.Key,
 					Revenue = x.Sum(s => s.Revenue),
@@ -55,7 +55,7 @@ namespace eToroAccountStatementProcessor.Models
 		public TradeType TradeType { get; set; }
 		public decimal Revenue { get { return Expense + Profit; } }
 		public decimal Expense { get; set; }
-		public decimal Profit { get; set; }	
+		public decimal Profit { get; set; }
 	}
 
 	public enum TradeType

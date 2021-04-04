@@ -9,7 +9,6 @@ namespace eToroAccountStatementProcessor.Models
 		public int Minimum { get; set; }
 		public int Maximum { get; set; }
 
-
 		private int _progress;
 		public int Progress
 		{
@@ -19,7 +18,7 @@ namespace eToroAccountStatementProcessor.Models
 				if (_progress != value)
 				{
 					_progress = value;
-					OnPropertyChanged(nameof(Progress)); 
+					OnPropertyChanged(nameof(Progress));
 				}
 			}
 		}
@@ -34,7 +33,7 @@ namespace eToroAccountStatementProcessor.Models
 
 	public class GlobalProgress : INotifyPropertyChanged
 	{
-		public int Minimum { get { return Progresses.Sum(x => x.Minimum); } } 
+		public int Minimum { get { return Progresses.Sum(x => x.Minimum); } }
 		public int Maximum { get { return Progresses.Sum(x => x.Maximum); } }
 		public int Progress { get { return Progresses.Sum(x => x.Progress); } }
 

@@ -54,7 +54,7 @@ namespace eToroAccountStatementProcessor.BO
 				}
 
 				row.Profit = Convert.ToDecimal((string)dr["Profit"]);
-				row.Expense = Convert.ToDecimal((string)dr["Amount"]);		
+				row.Expense = Convert.ToDecimal((string)dr["Amount"]);
 
 				retval.Add(row);
 			}

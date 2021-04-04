@@ -1,8 +1,8 @@
-﻿using System;
+﻿using eToroAccountStatementProcessor.Models;
+using ExcelDataReader;
+using System;
 using System.Data;
 using System.IO;
-using eToroAccountStatementProcessor.Models;
-using ExcelDataReader;
 
 namespace eToroAccountStatementProcessor.BO
 {
@@ -33,7 +33,7 @@ namespace eToroAccountStatementProcessor.BO
 							return true;
 						}
 					},
-				});			
+				});
 
 				return result.Tables[0];
 
