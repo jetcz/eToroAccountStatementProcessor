@@ -1,8 +1,8 @@
-Tento nástroj automaticky vypočítá data pro vykázaní daňe z příjmů fyzických osob na základě eToro account statemtentu.
+Tento nástroj automaticky vypočítá data pro vykázaní daně z příjmů fyzických osob na základě eToro account statementu.
 
 Funkce:
-- Program si po spuštění automaticky stáhne loňský jednotný kurz USD z kurzy.cz. Tento je pak možné libovnolně ručně přepsat.
-- Je možné vybrat více souborů najednou, data budou automaticky agregována. Je nutné, aby všechny statementy byly zafiltrované na stejný (jeden) ok.
+- Program si po spuštění automaticky stáhne loňský jednotný kurz USD z kurzy.cz. Tento je pak možné libovolně ručně přepsat.
+- Je možné vybrat více souborů najednou, data budou automaticky agregována. Je nutné, aby všechny statementy byly zafiltrované na stejný rok.
 - Automaticky jsou vyloučeny uzavřené pozice, které byly drženy déle než 3 roky (kromě CFD).
 
 Známé nedostatky:
