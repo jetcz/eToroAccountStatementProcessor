@@ -24,56 +24,47 @@ namespace eToroAccountStatementProcessor.BO
 			}
 		}
 
-		public List<ClosedPositionRecord> Process(DataTable Data)
+		public IEnumerable<ClosedPositionRecord> Process(DataTable Data)
 		{
-			List<ClosedPositionRecord> retval = new List<ClosedPositionRecord>();
-
 			for (int i = 0; i < Data.Rows.Count; i++)
 			{
 				//System.Threading.Thread.Sleep(1);
 				Progress.Progress = (int)Math.Ceiling(((i + 1) / (decimal)Data.Rows.Count) * 100);
 
-				ClosedPositionRecord row = new ClosedPositionRecord();
+				ClosedPositionRecord rec = new ClosedPositionRecord();
 
 				DataRow dr = Data.Rows[i];
 
 				if ((string)dr["Is Real"] == "CFD") //cfd must be taxed even if held over 3 yrs
 				{
-					row.TradeType = PositionType.CFD;
+					rec.TradeType = PositionType.CFD;
+					rec.IncludeToTaxReport = true;
 				}
 				else
 				{
 					var OpenDate = Convert.ToDateTime((string)dr["Open Date"]);
 					var CloseDate = Convert.ToDateTime((string)dr["Close Date"]);
 					TimeSpan span = CloseDate.Subtract(OpenDate);
-					bool IsOld = span.Seconds > 94608000; //3 years
-
-					if (IsOld)
-					{
-						continue;
-					}
+					rec.IncludeToTaxReport = span.TotalSeconds < 94608000; //3 years					
 
 					string Action = (string)dr["Action"];
 					if (Action.Contains(CryptosCheckStrings))
 					{
-						row.TradeType = PositionType.Crypto;
+						rec.TradeType = PositionType.Crypto;
 					}
 					else
 					{
-						row.TradeType = PositionType.Stock;
+						rec.TradeType = PositionType.Stock;
 					}
 				}
 
-				row.Profit = Convert.ToDecimal((string)dr["Profit"]);
-				row.Expense = Convert.ToDecimal((string)dr["Amount"]);
-				row.Commision = Convert.ToDecimal((string)dr["Spread"]);
-				row.Dividend = Convert.ToDecimal((string)dr["Rollover Fees And Dividends"]);
+				rec.Profit = Convert.ToDecimal((string)dr["Profit"]);
+				rec.Expense = Convert.ToDecimal((string)dr["Amount"]);
+				rec.Commision = Convert.ToDecimal((string)dr["Spread"]);
+				//rec.Dividend = Convert.ToDecimal((string)dr["Rollover Fees And Dividends"]);
 
-				retval.Add(row);
+				yield return rec;
 			}
-
-			return retval;
-
 		}
 	}
 }

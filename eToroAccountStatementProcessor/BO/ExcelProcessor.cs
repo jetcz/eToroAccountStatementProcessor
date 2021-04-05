@@ -36,7 +36,6 @@ namespace eToroAccountStatementProcessor.BO
 				});
 
 				return result.Tables[0];
-
 			}
 		}
 	}

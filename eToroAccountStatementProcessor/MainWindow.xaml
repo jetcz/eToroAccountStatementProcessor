@@ -75,7 +75,7 @@
 			FontWeight="Normal"
 			TextAlignment="Center"
 			DockPanel.Dock="Top" />
-			<DataGrid Name="dgResult" SelectionMode="Extended" 
+			<DataGrid Name="dgStatemetnSummary" SelectionMode="Extended" 
 				  VerticalScrollBarVisibility="Auto" DockPanel.Dock="Top" FontSize="12" 
 				  HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" CanUserAddRows="false"
 				  ColumnWidth="*" CanUserDeleteRows="false" IsReadOnly="true" SelectionUnit="Cell"
@@ -149,7 +149,8 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Rollover Fees and Dividends" Binding="{Binding Dividend}">
+					<!--dividends are ignored, anyway the closed positions give different dividends sum than the financial summary, dunno why-->
+					<!--<DataGridTextColumn Header="Rollover Fees and Dividends" Binding="{Binding Dividend}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -161,7 +162,7 @@
 								<Setter Property="TextBlock.Padding" Value="3" />
 							</Style>
 						</DataGridTextColumn.ElementStyle>
-					</DataGridTextColumn>
+					</DataGridTextColumn>-->
 				</DataGrid.Columns>
 				<DataGrid.RowStyle>
 					<Style TargetType="DataGridRow">

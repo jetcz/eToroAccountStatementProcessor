@@ -73,7 +73,12 @@ namespace eToroAccountStatementProcessor
 					try
 					{
 						var data = ep.GetData(filePath);
-						StatementModel.RawData.AddRange(sp.Process(data));
+						var statementData = sp.Process(data);
+
+						Parallel.ForEach(statementData, item =>
+						{
+							StatementModel.RawData.Add(item);
+						});					
 					}
 					catch (Exception ex)
 					{
@@ -109,14 +114,11 @@ namespace eToroAccountStatementProcessor
 				return;
 			}
 
-			var statementModel = StatementModel.GetViewModel();
-			var taxModel = new TaxModel().GetTaxReportModel(statementModel);
-
 			Dispatcher.Invoke(() =>
 			{
 				pnlGrids.Visibility = Visibility.Visible;
-				dgResult.ItemsSource = statementModel;
-				dgTaxReport.ItemsSource = taxModel;
+				dgStatemetnSummary.ItemsSource = StatementModel.GetSummaryViewModel();
+				dgTaxReport.ItemsSource = StatementModel.GetTaxReportModel();
 			});
 		}
 
@@ -155,8 +157,16 @@ namespace eToroAccountStatementProcessor
 		{
 			MessageBox.Show(@"eToro Account Statement Processor
 
-This tools calculates tax data from eToro account statement.
-It supports selecting of multiple files at once.  Make sure that the statement(s) cover single year only. It automatically skips trades opened earlier than 3 years ago (except CFD).
+Tento nástroj automaticky vypočítá data pro vykázaní daňe z příjmů fyzických osob na základě eToro account statemtentu.
+
+Funkce:
+- Program si po spuštění automaticky stáhne loňský jednotný kurz USD z kurzy.cz. Tento je pak možné libovnolně ručně přepsat.
+- Je možné vybrat více souborů najednou, data budou automaticky agregována. Je nutné, aby všechny statementy byly zafiltrované na stejný (jeden) ok.
+- Automaticky jsou vyloučeny uzavřené pozice, které byly drženy déle než 3 roky (kromě CFD).
+
+Známé nedostatky:
+- Dividendy nejsou nijak zohledňovány. Tyto jsou již zdaněny v zemi vzniku a podle platných smluv České republiky o zamezení dvojímu zdanění v oboru daní z příjmu, resp. z příjmu a z majetku, není třeba je danit znovu. Daňové přiznání by přesto mělo obsahovat úhrn dividend, ale z eToro account statementu není možné získat všechna potřebná data - země vzniku, částka před zdaněním v zemi v vzniku.
+- Krypto staking rewards jsou vedeny jako běžný nákup kryptoměn. V případě uzavření této pozice je pak ve statementu veden náklad na tuto pozici ve výši, která se rovná hodnotě v USD při připsání této odměny. Tento náklad je ve skutečnosti ale nulový. (???)
 
 Jiří Macháček
 jiri.machacek87@gmail.com
