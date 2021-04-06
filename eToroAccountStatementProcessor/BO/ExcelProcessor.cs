@@ -6,7 +6,6 @@ using System.IO;
 
 namespace eToroAccountStatementProcessor.BO
 {
-
 	public class ExcelProcessor
 	{
 		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };

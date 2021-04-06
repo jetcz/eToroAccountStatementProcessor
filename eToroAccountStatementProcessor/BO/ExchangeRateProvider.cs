@@ -9,7 +9,7 @@ namespace eToroAccountStatementProcessor.BO
 	public class ExchangeRateProvider
 	{
 		private readonly int Year;
-		private string CurrencyCode;
+		private readonly string CurrencyCode;
 
 		public ExchangeRateProvider(int Year, string CurrencyCode)
 		{
