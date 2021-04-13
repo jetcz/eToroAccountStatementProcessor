@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 
 namespace eToroAccountStatementProcessor.BO
 {
@@ -9,7 +10,7 @@ namespace eToroAccountStatementProcessor.BO
 	{
 		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
 
-		private readonly List<string> Cryptos = new List<string>() {
+		public static readonly List<string> Cryptos = new List<string>() {
 			"Bitcoin", "Ethereum", "Bitcoin Cash", "Ripple", "Dash", "Litecoin", "Ethereum Classic", "Cardano", "IOTA", "Stellar", "EOS", "NEO", "TRON", "ZCASH", "Binance Coin", "Tezos"
 		};
 
@@ -26,9 +27,30 @@ namespace eToroAccountStatementProcessor.BO
 
 		public IEnumerable<ClosedPositionRecord> Process(DataTable Data)
 		{
+			//resolve culture of the data
+			CultureInfo culture = null;
+		
+			string date = (string)Data.Rows[0]["Open Date"];
+
+			CultureInfo[] cultures = { new CultureInfo("cs-CZ"), CultureInfo.InvariantCulture, new CultureInfo("en-US") };
+
+			foreach (var c in cultures)
+			{
+				if (DateTime.TryParse(date, c, DateTimeStyles.None, out _))
+				{
+					culture = c; //this unfortunately does not mean that the decimal point in the excel is also of this culture, hence we replace "," with "." manually
+					break;
+				}
+			}
+
+			if (culture is null)
+			{
+				throw new Exception("Could not determine culture of the excel file. Contact support and attach the excel file.");
+			} 
+
+			//process the data
 			for (int i = 0; i < Data.Rows.Count; i++)
 			{
-				//System.Threading.Thread.Sleep(1);
 				Progress.Progress = (int)Math.Ceiling(((i + 1) / (decimal)Data.Rows.Count) * 100);
 
 				ClosedPositionRecord rec = new ClosedPositionRecord();
@@ -42,8 +64,8 @@ namespace eToroAccountStatementProcessor.BO
 				}
 				else
 				{
-					var OpenDate = Convert.ToDateTime((string)dr["Open Date"]);
-					var CloseDate = Convert.ToDateTime((string)dr["Close Date"]);
+					var OpenDate = Convert.ToDateTime((string)dr["Open Date"], culture);
+					var CloseDate = Convert.ToDateTime((string)dr["Close Date"], culture);
 					TimeSpan span = CloseDate.Subtract(OpenDate);
 					rec.IncludeToTaxReport = span.TotalSeconds < 94608000; //3 years					
 
@@ -58,11 +80,10 @@ namespace eToroAccountStatementProcessor.BO
 					}
 				}
 
-				rec.Profit = Convert.ToDecimal((string)dr["Profit"]);
-				rec.Expense = Convert.ToDecimal((string)dr["Amount"]);
-				rec.Commision = Convert.ToDecimal((string)dr["Spread"]);
-				//rec.Dividend = Convert.ToDecimal((string)dr["Rollover Fees And Dividends"]);
-
+				rec.Profit = Convert.ToDecimal(((string)dr["Profit"]).Replace(',','.'), CultureInfo.InvariantCulture);
+				rec.Expense = Convert.ToDecimal(((string)dr["Amount"]).Replace(',', '.'), CultureInfo.InvariantCulture);
+				rec.Commision = Convert.ToDecimal(((string)dr["Spread"]).Replace(',', '.'), CultureInfo.InvariantCulture);
+		
 				yield return rec;
 			}
 		}

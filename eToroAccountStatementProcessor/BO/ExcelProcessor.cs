@@ -11,7 +11,7 @@ namespace eToroAccountStatementProcessor.BO
 		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
 
 		public DataTable GetData(string filePath)
-		{
+		{	
 			using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
 			using (var reader = ExcelReaderFactory.CreateReader(stream))
 			{
