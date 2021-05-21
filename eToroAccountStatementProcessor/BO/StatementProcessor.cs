@@ -11,7 +11,7 @@ namespace eToroAccountStatementProcessor.BO
 		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
 
 		public static readonly List<string> Cryptos = new List<string>() {
-			"Bitcoin", "Ethereum", "Bitcoin Cash", "Ripple", "Dash", "Litecoin", "Ethereum Classic", "Cardano", "IOTA", "Stellar", "EOS", "NEO", "TRON", "ZCASH", "Binance Coin", "Tezos"
+			"Bitcoin", "Ethereum", "Bitcoin Cash", "Ripple", "Dash", "Litecoin", "Ethereum Classic", "Cardano", "IOTA", "Stellar", "EOS", "NEO", "TRON", "ZCASH", "Binance Coin", "Tezos", "Uniswap", "Dogecoin", "Chainlink"
 		};
 
 		private readonly List<string> CryptosCheckStrings = new List<string>();
