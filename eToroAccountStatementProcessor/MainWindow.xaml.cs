@@ -32,6 +32,11 @@ namespace eToroAccountStatementProcessor
 			Progress = new GlobalProgressModel();
 			prg.DataContext = Progress;
 			SetCurrency();
+
+			if (!StatementProcessor.Cryptos.Any())
+			{
+				MessageBox.Show($"Error: No config found or no crypto defined. Program will not be able to extract crypto trades.");
+			}
 		}
 
 		private async void DownloadExchangeRate()

@@ -1,6 +1,7 @@
 ﻿using eToroAccountStatementProcessor.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Globalization;
 
@@ -10,9 +11,14 @@ namespace eToroAccountStatementProcessor.BO
 	{
 		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
 
-		public static readonly List<string> Cryptos = new List<string>() {
-			"Bitcoin", "Ethereum", "Bitcoin Cash", "Ripple", "Dash", "Litecoin", "Ethereum Classic", "Cardano", "IOTA", "Stellar", "EOS", "NEO", "TRON", "ZCASH", "Binance Coin", "Tezos", "Uniswap", "Dogecoin", "Chainlink"
-		};
+		public static string[] Cryptos
+		{
+			get
+			{
+				return ConfigurationManager.AppSettings.Get("Cryptos")?.Split('|') ?? new string[0];
+			}
+		}
+
 
 		private readonly List<string> CryptosCheckStrings = new List<string>();
 
@@ -29,7 +35,7 @@ namespace eToroAccountStatementProcessor.BO
 		{
 			//resolve culture of the data
 			CultureInfo culture = null;
-		
+
 			string date = (string)Data.Rows[0]["Open Date"];
 
 			CultureInfo[] cultures = { new CultureInfo("cs-CZ"), CultureInfo.InvariantCulture, new CultureInfo("en-US") };
@@ -46,7 +52,7 @@ namespace eToroAccountStatementProcessor.BO
 			if (culture is null)
 			{
 				throw new Exception("Could not determine culture of the excel file. Contact support and attach the excel file.");
-			} 
+			}
 
 			//process the data
 			for (int i = 0; i < Data.Rows.Count; i++)
@@ -80,10 +86,10 @@ namespace eToroAccountStatementProcessor.BO
 					}
 				}
 
-				rec.Profit = Convert.ToDecimal(((string)dr["Profit"]).Replace(',','.'), CultureInfo.InvariantCulture);
+				rec.Profit = Convert.ToDecimal(((string)dr["Profit"]).Replace(',', '.'), CultureInfo.InvariantCulture);
 				rec.Expense = Convert.ToDecimal(((string)dr["Amount"]).Replace(',', '.'), CultureInfo.InvariantCulture);
 				rec.Commision = Convert.ToDecimal(((string)dr["Spread"]).Replace(',', '.'), CultureInfo.InvariantCulture);
-		
+
 				yield return rec;
 			}
 		}
