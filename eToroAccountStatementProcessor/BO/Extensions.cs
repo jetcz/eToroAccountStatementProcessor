@@ -5,7 +5,7 @@ namespace eToroAccountStatementProcessor.BO
 {
 	public static class Extensions
 	{
-		public static bool Contains(this string s, List<string> list)
+		public static bool IsIn(this string s, List<string> list)
 		{
 			for (int i = 0; i < list.Count; i++)
 			{

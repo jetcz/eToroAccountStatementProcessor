@@ -44,7 +44,7 @@ namespace eToroAccountStatementProcessor.BO
 			{
 				if (DateTime.TryParse(date, c, DateTimeStyles.None, out _))
 				{
-					culture = c; //this unfortunately does not mean that the decimal point in the excel is also of this culture, hence we replace "," with "." manually
+					culture = c;
 					break;
 				}
 			}
@@ -52,7 +52,7 @@ namespace eToroAccountStatementProcessor.BO
 			if (culture is null)
 			{
 				throw new Exception("Could not determine culture of the excel file. Contact support and attach the excel file.");
-			}
+			}	
 
 			//process the data
 			for (int i = 0; i < Data.Rows.Count; i++)
@@ -63,32 +63,35 @@ namespace eToroAccountStatementProcessor.BO
 
 				DataRow dr = Data.Rows[i];
 
-				if ((string)dr["Is Real"] == "CFD") //cfd must be taxed even if held over 3 yrs
+				bool IsCFD = (string)dr["Type"] == "CFD";	
+				if (IsCFD) //cfd must be taxed even if held over 3 yrs
 				{
 					rec.TradeType = PositionType.CFD;
 					rec.IncludeToTaxReport = true;
 				}
 				else
 				{
-					var OpenDate = Convert.ToDateTime((string)dr["Open Date"], culture);
-					var CloseDate = Convert.ToDateTime((string)dr["Close Date"], culture);
-					TimeSpan span = CloseDate.Subtract(OpenDate);
-					rec.IncludeToTaxReport = span.TotalSeconds < 94608000; //3 years					
-
-					string Action = (string)dr["Action"];
-					if (Action.Contains(CryptosCheckStrings))
+					bool IsCrypto = ((string)dr["Action"]).IsIn(CryptosCheckStrings);
+					if (IsCrypto) //crypto must be taxed even if held over 3 yrs
 					{
 						rec.TradeType = PositionType.Crypto;
+						rec.IncludeToTaxReport = true;
 					}
-					else
+					else //stock
 					{
+						var OpenDate = Convert.ToDateTime((string)dr["Open Date"], culture);
+						var CloseDate = Convert.ToDateTime((string)dr["Close Date"], culture);
+						TimeSpan span = CloseDate.Subtract(OpenDate);
+
 						rec.TradeType = PositionType.Stock;
+						rec.IncludeToTaxReport = span.TotalSeconds < 94608000; //3 years	
 					}
 				}
 
-				rec.Profit = Convert.ToDecimal(((string)dr["Profit"]).Replace(',', '.'), CultureInfo.InvariantCulture);
-				rec.Expense = Convert.ToDecimal(((string)dr["Amount"]).Replace(',', '.'), CultureInfo.InvariantCulture);
-				rec.Commision = Convert.ToDecimal(((string)dr["Spread"]).Replace(',', '.'), CultureInfo.InvariantCulture);
+				//these are double internally
+				rec.Profit = Convert.ToDecimal(dr["Profit"]);
+				rec.Expense = Convert.ToDecimal(dr["Amount"]);
+				rec.Commision = Convert.ToDecimal(dr["Spread"]);
 
 				yield return rec;
 			}
