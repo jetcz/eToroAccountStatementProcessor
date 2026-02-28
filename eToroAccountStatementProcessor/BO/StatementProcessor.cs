@@ -9,41 +9,20 @@ namespace eToroAccountStatementProcessor.BO
 {
 	public class StatementProcessor
 	{
-		private const int iType = 15;
-		private const int iAction = 1;
-		private const int iOpenDate = 4;
-		private const int iClosedDate = 5;
-		private const int iProfit = 8;
-		private const int iAmount = 2;
-		private const int iSpread = 7;
+		private const int iType = 19;
+	
+		private const int iOpenDate = 5;
+		private const int iClosedDate = 6;
+		private const int iProfit = 10;
+		private const int iAmount = 3;
+		private const int iSpread = 9;
 
 		public ProgressModel Progress { get; set; } = new ProgressModel() { Minimum = 0, Maximum = 100, Progress = 0 };
-
-		public static string[] Cryptos
-		{
-			get
-			{
-				return ConfigurationManager.AppSettings.Get("Cryptos")?.Split('|') ?? new string[0];
-			}
-		}
-
-
-		private readonly List<string> CryptosCheckStrings = new List<string>();
-
-		public StatementProcessor()
-		{
-			foreach (var item in Cryptos)
-			{
-				CryptosCheckStrings.Add($"Buy {item}");
-				CryptosCheckStrings.Add($"Sell {item}");
-			}
-		}
+		public CultureInfo Culture { get; private set; }
 
 		public IEnumerable<ClosedPositionRecord> Process(DataTable Data)
 		{
 			//resolve culture of the data
-			CultureInfo culture = null;
-
 			string date = (string)Data.Rows[0][iOpenDate];
 
 			CultureInfo[] cultures = { new CultureInfo("cs-CZ"), CultureInfo.InvariantCulture, new CultureInfo("en-US") };
@@ -52,12 +31,12 @@ namespace eToroAccountStatementProcessor.BO
 			{
 				if (DateTime.TryParse(date, c, DateTimeStyles.None, out _))
 				{
-					culture = c;
+					Culture = c;
 					break;
 				}
 			}
 
-			if (culture is null)
+			if (Culture is null)
 			{
 				throw new Exception("Could not determine culture of the excel file. Contact support and attach the excel file.");
 			}
@@ -71,35 +50,37 @@ namespace eToroAccountStatementProcessor.BO
 
 				DataRow dr = Data.Rows[i];
 
-				bool IsCFD = (string)dr[iType] == "CFD";
-				if (IsCFD) //cfd must be taxed even if held over 3 yrs
+				string type = (string)dr[iType];
+
+				var OpenDate = Convert.ToDateTime((string)dr[iOpenDate], Culture);
+				var CloseDate = Convert.ToDateTime((string)dr[iClosedDate], Culture);
+				TimeSpan span = CloseDate.Subtract(OpenDate);
+
+				switch (type)
 				{
-					rec.TradeType = PositionType.CFD;
-					rec.IncludeToTaxReport = true;
-				}
-				else
-				{
-					bool IsCrypto = ((string)dr[iAction]).IsIn(CryptosCheckStrings);
-					if (IsCrypto) //crypto must be taxed even if held over 3 yrs
-					{
+					case "CFD":
+						rec.TradeType = PositionType.CFD;
+						rec.IncludeToTaxReport = true;
+						break;
+					case "Crypto":
 						rec.TradeType = PositionType.Crypto;
 						rec.IncludeToTaxReport = true;
-					}
-					else //stock
-					{
-						var OpenDate = Convert.ToDateTime((string)dr[iOpenDate], culture);
-						var CloseDate = Convert.ToDateTime((string)dr[iClosedDate], culture);
-						TimeSpan span = CloseDate.Subtract(OpenDate);
-
-						rec.TradeType = PositionType.Stock;
 						rec.IncludeToTaxReport = span.TotalSeconds < 94608000; //3 years	
-					}
+						break;
+					case "Stocks":
+                    case "ETF":
+                        rec.TradeType = PositionType.StockAndETF;
+						rec.IncludeToTaxReport = span.TotalSeconds < 94608000; //3 years	
+						break;
+
+                    default:
+						break;
 				}
 
 				//these are double internally
 				rec.Profit = Convert.ToDecimal(dr[iProfit]);
 				rec.Expense = Convert.ToDecimal(dr[iAmount]);
-				rec.Commision = Convert.ToDecimal(dr[iSpread]);
+				rec.Commision = Convert.ToDecimal(((string)dr[iSpread]).Replace('.',',')); //idk why spread is stored as string with dot as decimal separator
 
 				yield return rec;
 			}

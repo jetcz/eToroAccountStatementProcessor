@@ -32,11 +32,6 @@ namespace eToroAccountStatementProcessor
 			Progress = new GlobalProgressModel();
 			prg.DataContext = Progress;
 			SetCurrency();
-
-			if (!StatementProcessor.Cryptos.Any())
-			{
-				MessageBox.Show($"Error: No config found or no crypto defined. Program will not be able to extract crypto trades.");
-			}
 		}
 
 		private async void DownloadExchangeRate()
@@ -79,6 +74,12 @@ namespace eToroAccountStatementProcessor
 					{
 						var data = ep.GetData(filePath);
 						var statementData = sp.Process(data);
+
+						// Store the culture from the statement processor
+						if (sp.Culture != null && StatementModel.Culture == null)
+						{
+							StatementModel.Culture = sp.Culture;
+						}
 
 						Parallel.ForEach(statementData, item =>
 						{
@@ -165,8 +166,7 @@ Tento nástroj automaticky vypočítá data pro vykázaní daně z příjmů fyz
 Funkce:
 - Program si po spuštění automaticky stáhne loňský jednotný kurz USD z kurzy.cz. Tento je pak možné libovolně ručně přepsat.
 - Je možné vybrat více souborů najednou, data budou automaticky agregována. Je nutné, aby všechny statementy byly zafiltrované na stejný rok.
-- Automaticky jsou vyloučeny uzavřené pozice akcií, které byly drženy déle než 3 roky (kromě CFD a krypto).
-- Detekce kryptoměn: {string.Join(", ", StatementProcessor.Cryptos)}
+- Automaticky jsou vyloučeny uzavřené pozice akcií, které byly drženy déle než 3 roky (kromě CFD).
 
 Známé nedostatky:
 - Dividendy nejsou nijak zohledňovány. Tyto jsou již zdaněny v zemi vzniku a podle platných smluv České republiky o zamezení dvojímu zdanění v oboru daní z příjmu, resp. z příjmu a z majetku, není třeba je danit znovu. Daňové přiznání by přesto mělo obsahovat úhrn dividend, ale z eToro account statementu není možné získat všechna potřebná data (částka před zdaněním v zemi v vzniku).

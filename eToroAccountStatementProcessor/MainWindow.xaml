@@ -97,7 +97,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}">
+					<DataGridTextColumn Header="Revenue" Binding="{Binding FormattedRevenue}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -110,7 +110,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Expenses" Binding="{Binding Expense}">
+					<DataGridTextColumn Header="Expenses" Binding="{Binding FormattedExpense}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -123,7 +123,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Profit" Binding="{Binding Profit}">
+					<DataGridTextColumn Header="Profit" Binding="{Binding FormattedProfit}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -136,7 +136,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Commisions (Spread)" Binding="{Binding Commision}">
+					<DataGridTextColumn Header="Commisions (Spread)" Binding="{Binding FormattedCommision}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -215,7 +215,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Příjmy" Binding="{Binding Revenue}" >
+					<DataGridTextColumn Header="Příjmy" Binding="{Binding FormattedRevenue}" >
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -228,7 +228,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Výdaje" Binding="{Binding Expense}">
+					<DataGridTextColumn Header="Výdaje" Binding="{Binding FormattedExpense}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -241,7 +241,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Rozdíl (příjmy - výdaje)" Binding="{Binding Profit}">
+					<DataGridTextColumn Header="Rozdíl (příjmy - výdaje)" Binding="{Binding FormattedProfit}">
 						<DataGridTextColumn.HeaderStyle>
 							<Style TargetType="DataGridColumnHeader">
 								<Setter Property="HorizontalContentAlignment" Value="Center" />
